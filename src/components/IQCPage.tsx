@@ -17,8 +17,19 @@ interface IQCPageProps {
 }
 
 export default function IQCPage({ results, onAddResult, configs, instruments, currentUser, events, onAddEvent }: IQCPageProps) {
-  const [selectedTest, setSelectedTest] = useState<string>(configs[0]?.id || '');
-  const [selectedInst, setSelectedInst] = useState<string>(instruments[0]?.id || '');
+  const [selectedTest, setSelectedTest] = useState<string>('');
+  const [selectedInst, setSelectedInst] = useState<string>('');
+
+  // Sync selection if list changes or starts empty
+  React.useEffect(() => {
+    if (!selectedTest && configs.length > 0) {
+      setSelectedTest(configs[0].id);
+    }
+    if (!selectedInst && instruments.length > 0) {
+      setSelectedInst(instruments[0].id);
+    }
+  }, [configs, instruments, selectedTest, selectedInst]);
+
   const [level, setLevel] = useState<1 | 2 | 3>(1);
   const [value, setValue] = useState<string>('');
   const [comment, setComment] = useState<string>('');
@@ -184,6 +195,11 @@ export default function IQCPage({ results, onAddResult, configs, instruments, cu
                 >
                   {instruments.map(i => <option key={i.id} value={i.id}>{i.name} ({i.model})</option>)}
                 </select>
+                {config.currentLot && (
+                  <p className="text-[10px] font-bold text-[#0F4C81] mt-1 ml-1 uppercase">
+                    Active Reagent Lot: {config.currentLot}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

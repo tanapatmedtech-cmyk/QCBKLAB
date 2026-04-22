@@ -13,8 +13,19 @@ interface EQAPageProps {
 }
 
 export default function EQAPage({ eqaResults, onAddEQA, configs, instruments }: EQAPageProps) {
-  const [selectedTest, setSelectedTest] = useState<string>(configs[0]?.id || '');
-  const [selectedInst, setSelectedInst] = useState<string>(instruments[0]?.id || '');
+  const [selectedTest, setSelectedTest] = useState<string>('');
+  const [selectedInst, setSelectedInst] = useState<string>('');
+
+  // Sync selection if list changes or starts empty
+  React.useEffect(() => {
+    if (!selectedTest && configs.length > 0) {
+      setSelectedTest(configs[0].id);
+    }
+    if (!selectedInst && instruments.length > 0) {
+      setSelectedInst(instruments[0].id);
+    }
+  }, [configs, instruments, selectedTest, selectedInst]);
+
   const [cycle, setCycle] = useState<string>('Cycle 1/2026');
   const [yourResult, setYourResult] = useState<string>('');
   const [peerMean, setPeerMean] = useState<string>('');

@@ -146,14 +146,46 @@ export const deleteUser = async (userId: string) => {
   }
 };
 
+export const saveInstrument = async (inst: Instrument) => {
+  try {
+    await setDoc(doc(db, 'instruments', inst.id), inst);
+  } catch (err) {
+    handleFirestoreError(err, 'write', `instruments/${inst.id}`);
+  }
+};
+
+export const deleteInstrument = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'instruments', id));
+  } catch (err) {
+    handleFirestoreError(err, 'delete', `instruments/${id}`);
+  }
+};
+
+export const saveConfig = async (conf: QCConfig) => {
+  try {
+    await setDoc(doc(db, 'qc_configs', conf.id), conf);
+  } catch (err) {
+    handleFirestoreError(err, 'write', `qc_configs/${conf.id}`);
+  }
+};
+
+export const deleteConfig = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'qc_configs', id));
+  } catch (err) {
+    handleFirestoreError(err, 'delete', `qc_configs/${id}`);
+  }
+};
+
 export const saveInstruments = async (insts: Instrument[]) => {
     for (const inst of insts) {
-        await setDoc(doc(db, 'instruments', inst.id), inst);
+        await saveInstrument(inst);
     }
 };
 
 export const saveConfigs = async (configs: QCConfig[]) => {
     for (const conf of configs) {
-        await setDoc(doc(db, 'qc_configs', conf.id), conf);
+        await saveConfig(conf);
     }
 };

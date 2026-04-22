@@ -142,10 +142,10 @@ export default function App() {
         // Fail-safe: if we don't get users within 5 seconds, still allow login UI to show
         setTimeout(() => setLoading(false), 5000);
         const unsubInst = syncInstruments((data) => {
-          if (data.length > 0) setInstruments(data);
+          setInstruments(data);
         });
         const unsubConfigs = syncConfigs((data) => {
-          if (data.length > 0) setConfigs(data);
+          setConfigs(data);
         });
 
         activeUnsub = () => {
@@ -183,10 +183,10 @@ export default function App() {
 
   const handleAddEQA = (res: EQAResult) => addEQAResult(res);
 
-  const handleUpdateInstruments = (inst: Instrument[]) => saveInstruments(inst);
-  const handleUpdateConfigs = (conf: QCConfig[]) => saveConfigs(conf);
-
-  const handleAddEvent = (event: QCEvent) => addQCEvent(event);
+  const handleAddInstrument = (inst: Instrument) => saveInstrument(inst);
+  const handleDeleteInstrument = (id: string) => deleteInstrument(id);
+  const handleAddConfig = (conf: QCConfig) => saveConfig(conf);
+  const handleDeleteConfig = (id: string) => deleteConfig(id);
 
   const handleUpdateUser = (u: User) => saveUser(u);
   const handleDeleteUser = (uid: string) => deleteUser(uid);
@@ -249,9 +249,11 @@ export default function App() {
       {activeTab === 'settings' && (
         <SettingsPage 
           instruments={instruments} 
-          setInstruments={handleUpdateInstruments}
+          onAddInstrument={handleAddInstrument}
+          onDeleteInstrument={handleDeleteInstrument}
           configs={configs}
-          setConfigs={handleUpdateConfigs}
+          onAddConfig={handleAddConfig}
+          onDeleteConfig={handleDeleteConfig}
         />
       )}
       {activeTab === 'admin' && (

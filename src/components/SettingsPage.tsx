@@ -5,12 +5,21 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface SettingsPageProps {
   instruments: Instrument[];
-  setInstruments: (inst: Instrument[]) => void;
+  onAddInstrument: (inst: Instrument) => void;
+  onDeleteInstrument: (id: string) => void;
   configs: QCConfig[];
-  setConfigs: (conf: QCConfig[]) => void;
+  onAddConfig: (conf: QCConfig) => void;
+  onDeleteConfig: (id: string) => void;
 }
 
-export default function SettingsPage({ instruments, setInstruments, configs, setConfigs }: SettingsPageProps) {
+export default function SettingsPage({ 
+  instruments, 
+  onAddInstrument, 
+  onDeleteInstrument, 
+  configs, 
+  onAddConfig, 
+  onDeleteConfig 
+}: SettingsPageProps) {
   const [activeSubTab, setActiveSubTab] = useState<'tests' | 'instruments'>('tests');
   
   // Instrument Form State
@@ -20,51 +29,73 @@ export default function SettingsPage({ instruments, setInstruments, configs, set
   const [testForm, setTestForm] = useState<Partial<QCConfig>>({
     testName: '',
     unit: '',
+    currentLot: '',
     tea: 10,
     level1: { mean: 0, sd: 0 },
     level2: { mean: 0, sd: 0 },
     level3: { mean: 0, sd: 0 }
   });
 
-  const handleAddInstrument = () => {
+  const handleAddInstrument = async () => {
     if (!instForm.name) return;
     const newInst: Instrument = {
       id: 'inst-' + Math.random().toString(36).substr(2, 5),
       name: instForm.name,
       model: instForm.model
     };
-    setInstruments([...instruments, newInst]);
-    setInstForm({ name: '', model: '' });
+    try {
+      await onAddInstrument(newInst);
+      setInstForm({ name: '', model: '' });
+    } catch (err) {
+      alert('Error adding analyzer');
+    }
   };
 
-  const handleDeleteInstrument = (id: string) => {
-    setInstruments(instruments.filter(i => i.id !== id));
+  const handleDeleteInstrument = async (id: string) => {
+    if (confirm('Are you sure you want to delete this analyzer?')) {
+      try {
+        await onDeleteInstrument(id);
+      } catch (err) {
+        alert('Error deleting analyzer');
+      }
+    }
   };
 
-  const handleAddTest = () => {
+  const handleAddTest = async () => {
     if (!testForm.testName) return;
     const newConfig: QCConfig = {
       id: 'test-' + Math.random().toString(36).substr(2, 5),
       testName: testForm.testName || '',
       unit: testForm.unit || '',
+      currentLot: testForm.currentLot || '',
       tea: testForm.tea || 0,
       level1: testForm.level1 || { mean: 0, sd: 0 },
       level2: testForm.level2 || { mean: 0, sd: 0 },
       level3: testForm.level3 || { mean: 0, sd: 0 }
     };
-    setConfigs([...configs, newConfig]);
-    setTestForm({
-      testName: '',
-      unit: '',
-      tea: 10,
-      level1: { mean: 0, sd: 0 },
-      level2: { mean: 0, sd: 0 },
-      level3: { mean: 0, sd: 0 }
-    });
+    try {
+      await onAddConfig(newConfig);
+      setTestForm({
+        testName: '',
+        unit: '',
+        tea: 10,
+        level1: { mean: 0, sd: 0 },
+        level2: { mean: 0, sd: 0 },
+        level3: { mean: 0, sd: 0 }
+      });
+    } catch (err) {
+      alert('Error adding test config');
+    }
   };
 
-  const handleDeleteConfig = (id: string) => {
-    setConfigs(configs.filter(c => c.id !== id));
+  const handleDeleteConfig = async (id: string) => {
+    if (confirm('Are you sure you want to delete this test configuration?')) {
+      try {
+        await onDeleteConfig(id);
+      } catch (err) {
+        alert('Error deleting config');
+      }
+    }
   };
 
   return (
@@ -126,14 +157,24 @@ export default function SettingsPage({ instruments, setInstruments, configs, set
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 shadow-sm block ml-1">TEa (%)</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 shadow-sm block ml-1">Reagent Lot</label>
                     <input
-                      type="number"
-                      value={testForm.tea}
-                      onChange={(e) => setTestForm({ ...testForm, tea: parseFloat(e.target.value) })}
+                      type="text"
+                      value={testForm.currentLot}
+                      onChange={(e) => setTestForm({ ...testForm, currentLot: e.target.value })}
+                      placeholder="e.g. LOT-2026"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 transition-all font-mono"
                     />
                   </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 shadow-sm block ml-1">TEa (%)</label>
+                  <input
+                    type="number"
+                    value={testForm.tea}
+                    onChange={(e) => setTestForm({ ...testForm, tea: parseFloat(e.target.value) })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 transition-all font-mono"
+                  />
                 </div>
 
                 <div className="space-y-3 pt-2">

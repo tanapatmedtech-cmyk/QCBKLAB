@@ -59,6 +59,7 @@ export interface QCConfig {
   testName: string;
   unit: string;
   tea: number; // Total Allowable Error in %
+  currentLot?: string; // Active reagent lot
   level1: {
     mean: number;
     sd: number;
