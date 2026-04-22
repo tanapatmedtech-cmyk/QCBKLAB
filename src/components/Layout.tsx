@@ -27,7 +27,7 @@ export default function Layout({ children, activeTab, setActiveTab, user, onLogo
       {/* Sidebar */}
       <aside className="w-64 bg-[#0F4C81] text-white flex flex-col">
         <div className="p-6 border-b border-white/10">
-          <h1 className="text-xl font-black tracking-tighter italic">QCBKLABPLUS</h1>
+          <h1 className="text-xl font-black tracking-tight italic">QC BK Lab Plus<sup>+</sup></h1>
           <p className="text-[10px] text-white/60 mt-1 uppercase tracking-widest font-bold">Lab Quality Control</p>
         </div>
         

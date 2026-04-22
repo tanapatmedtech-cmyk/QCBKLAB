@@ -147,7 +147,7 @@ export default function Auth({ onLogin, users, loadingData }: AuthProps) {
           <div className="w-16 h-16 bg-[#0F4C81] rounded-2xl mx-auto flex items-center justify-center text-white mb-4 shadow-lg shadow-[#0F4C81]/20">
             <ClipboardCheck size={32} />
           </div>
-          <h1 className="text-2xl font-black text-[#0F4C81] tracking-tight">QCBKLAB-PRO</h1>
+          <h1 className="text-2xl font-black text-[#0F4C81] tracking-tight">QC BK Lab Plus<sup>+</sup></h1>
           <p className="text-slate-400 text-sm font-medium mt-1">Laboratory Quality Control System</p>
         </div>
 

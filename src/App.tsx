@@ -211,7 +211,7 @@ export default function App() {
         >
           <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
           <div className="text-center">
-            <p className="text-white font-bold tracking-tight">QCBKLAB-PRO</p>
+            <p className="text-white font-bold tracking-tight">QC BK Lab Plus<sup>+</sup></p>
             <p className="text-white/60 text-xs mt-1">กำลังเริ่มระบบและความปลอดภัย...</p>
           </div>
         </motion.div>
