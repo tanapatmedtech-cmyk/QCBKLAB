@@ -21,8 +21,10 @@ service cloud.firestore {
       allow read: if true; 
       // Anyone can create a registration
       allow create: if true;
-      // Only signed in users (self or admin) can update/delete
-      allow update, delete: if isSignedIn(); 
+      // Allow update for everyone (Public Access requested) - Unblocks Admin actions
+      allow update: if true;
+      // Keep delete restricted
+      allow delete: if isSignedIn(); 
     }
 
     match /qc_results/{resId} {

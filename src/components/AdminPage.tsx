@@ -16,6 +16,13 @@ interface AdminPageProps {
 export default function AdminPage({ users, onUpdateUser, onDeleteUser, results, onUpdateResults, configs, instruments }: AdminPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: '',
+    licenseNumber: '',
+    password: '',
+    role: 'MT' as 'MT' | 'MD'
+  });
 
   const handleToggleActive = (resultId: string) => {
     const reason = prompt('Please enter reason for status change (Doubtful result, Equipment failure, etc.):');
@@ -34,10 +41,53 @@ export default function AdminPage({ users, onUpdateUser, onDeleteUser, results, 
     onUpdateResults(updated);
   };
 
-  const handleToggleStatus = (userId: string, status: 'APPROVED' | 'DENIED' | 'PENDING') => {
-    const targetUser = users.find(u => u.id === userId);
-    if (targetUser) {
-      onUpdateUser({ ...targetUser, status });
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUser.name || !newUser.licenseNumber || !newUser.password) {
+      alert('โปรดกรอกข้อมูลให้ครบถ้วนครับ');
+      return;
+    }
+
+    const exists = users.some(u => u.licenseNumber === newUser.licenseNumber);
+    if (exists) {
+      alert('รหัสผู้ใช้นี้มีในระบบแล้วครับ');
+      return;
+    }
+
+    const userToSave: User = {
+      id:'u-' + Math.random().toString(36).substr(2, 9),
+      name: newUser.name,
+      licenseNumber: newUser.licenseNumber,
+      password: newUser.password,
+      role: newUser.role,
+      status: 'APPROVED'
+    };
+
+    try {
+      await onUpdateUser(userToSave);
+      alert(`เพิ่มผู้ใช้งาน ${newUser.name} สำเร็จ!`);
+      setNewUser({ name: '', licenseNumber: '', password: '', role: 'MT' });
+      setIsAddingUser(false);
+    } catch (err) {
+      alert('เกิดข้อผิดพลาดในการบันทึกครับ');
+    }
+  };
+
+  const handleToggleStatus = async (userId: string, status: 'APPROVED' | 'DENIED' | 'PENDING') => {
+    try {
+      const targetUser = users.find(u => u.id === userId);
+      if (targetUser) {
+        console.log(`[ADMIN] Changing status for ${targetUser.name} to ${status}`);
+        await onUpdateUser({ ...targetUser, status });
+        if (status === 'APPROVED') {
+          alert(`อนุมัติสิทธิ์ให้คุณ ${targetUser.name} เรียบร้อยแล้วครับ!`);
+        } else if (status === 'DENIED') {
+          alert(`ปฏิเสธสิทธิ์คุณ ${targetUser.name} แล้วครับ`);
+        }
+      }
+    } catch (err) {
+      console.error('[ADMIN ERROR]', err);
+      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล โปรดลองใหม่อีกครั้งครับ');
     }
   };
 
@@ -66,18 +116,71 @@ export default function AdminPage({ users, onUpdateUser, onDeleteUser, results, 
     <div className="space-y-8 max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* User Management */}
-        <div className="lg:col-span-1 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 overflow-hidden">
+        <div className="lg:col-span-1 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 overflow-hidden flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-slate-800 flex items-center space-x-2">
               <Users size={20} className="text-[#0F4C81]" />
               <span>User Licenses</span>
             </h3>
-            <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full">
-              {users.length} Total
-            </span>
+            <button 
+              onClick={() => setIsAddingUser(!isAddingUser)}
+              className={`p-2 rounded-xl transition-all ${isAddingUser ? 'bg-red-50 text-red-500 rotate-45' : 'bg-[#0F4C81]/10 text-[#0F4C81]'}`}
+            >
+              <Activity size={18} />
+            </button>
           </div>
+
+          <AnimatePresence>
+            {isAddingUser && (
+              <motion.form 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                onSubmit={handleCreateUser}
+                className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 overflow-hidden"
+              >
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Register New Member</p>
+                <input 
+                  type="text" 
+                  placeholder="Full Name (เช่น นายสมชาย)"
+                  value={newUser.name}
+                  onChange={e => setNewUser({...newUser, name: e.target.value})}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 font-medium"
+                />
+                <input 
+                  type="text" 
+                  placeholder="Username/ID"
+                  value={newUser.licenseNumber}
+                  onChange={e => setNewUser({...newUser, licenseNumber: e.target.value})}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20 font-bold"
+                />
+                <input 
+                  type="password" 
+                  placeholder="Password"
+                  value={newUser.password}
+                  onChange={e => setNewUser({...newUser, password: e.target.value})}
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/20"
+                />
+                <div className="flex space-x-2">
+                   {['MT', 'MD'].map(role => (
+                     <button
+                       key={role}
+                       type="button"
+                       onClick={() => setNewUser({...newUser, role: role as any})}
+                       className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${newUser.role === role ? 'bg-[#0F4C81] text-white shadow-lg shadow-[#0F4C81]/20' : 'bg-white text-slate-400 border border-slate-200'}`}
+                     >
+                       {role}
+                     </button>
+                   ))}
+                </div>
+                <button type="submit" className="w-full py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">
+                   Confirm Registration
+                </button>
+              </motion.form>
+            )}
+          </AnimatePresence>
           
-          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+          <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
             {users.map(u => (
               <div key={u.id} className={`p-4 rounded-2xl border transition-all group ${
                 u.status === 'PENDING' ? 'bg-amber-50 border-amber-200' : 

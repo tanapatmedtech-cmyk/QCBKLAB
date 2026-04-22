@@ -25,6 +25,13 @@ export default defineConfig(({mode}) => {
       outDir: 'dist',
       sourcemap: false,
       minify: 'esbuild',
+      rollupOptions: {
+        output: {
+          entryFileNames: `[name].js`,
+          chunkFileNames: `[name].js`,
+          assetFileNames: `[name].[ext]`
+        }
+      }
     }
   };
 });
