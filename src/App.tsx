@@ -188,6 +188,8 @@ export default function App() {
   const handleAddConfig = (conf: QCConfig) => saveConfig(conf);
   const handleDeleteConfig = (id: string) => deleteConfig(id);
 
+  const handleAddEvent = (event: QCEvent) => addQCEvent(event);
+
   const handleUpdateUser = (u: User) => saveUser(u);
   const handleDeleteUser = (uid: string) => deleteUser(uid);
 

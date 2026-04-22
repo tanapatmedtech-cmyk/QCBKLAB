@@ -31,9 +31,14 @@ export default function LJChart({ results, config, level }: LJChartProps) {
   const chartWidth = width - padding * 2;
 
   // Y-Scale: +/- 4SD
-  const yMin = mean - 4 * sd;
-  const yMax = mean + 4 * sd;
-  const getY = (val: number) => padding + chartHeight - ((val - yMin) / (yMax - yMin)) * chartHeight;
+  const safeSD = Math.max(sd, mean * 0.001 || 0.1);
+  const yMin = mean - 4 * safeSD;
+  const yMax = mean + 4 * safeSD;
+  const getY = (val: number) => {
+    const range = yMax - yMin;
+    if (range === 0) return padding + chartHeight / 2;
+    return padding + chartHeight - ((val - yMin) / range) * chartHeight;
+  };
 
   // X-Scale: points
   const points = Math.max(10, filteredResults.length);
