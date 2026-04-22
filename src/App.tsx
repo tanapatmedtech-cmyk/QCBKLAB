@@ -179,20 +179,14 @@ export default function App() {
     localStorage.removeItem('qc_user');
   };
 
-  const handleAddResult = (res: QCResult) => {
-    addQCResult(res);
-  };
+  const handleAddResult = (res: QCResult) => addQCResult(res);
 
-  const handleAddEQA = (res: EQAResult) => {
-    addEQAResult(res);
-  };
+  const handleAddEQA = (res: EQAResult) => addEQAResult(res);
 
   const handleUpdateInstruments = (inst: Instrument[]) => saveInstruments(inst);
   const handleUpdateConfigs = (conf: QCConfig[]) => saveConfigs(conf);
 
-  const handleAddEvent = (event: QCEvent) => {
-    addQCEvent(event);
-  };
+  const handleAddEvent = (event: QCEvent) => addQCEvent(event);
 
   const handleUpdateUser = (u: User) => saveUser(u);
   const handleDeleteUser = (uid: string) => deleteUser(uid);

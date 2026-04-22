@@ -44,6 +44,8 @@ export interface EQAResult {
   targetValue?: number; // Optional, some schemes use target value
   date: string;
   score?: number; // SDI or VIS
+  bias?: number;
+  sigma?: number;
   comment?: string;
   reagentLot?: string;
   reagentExp?: string;

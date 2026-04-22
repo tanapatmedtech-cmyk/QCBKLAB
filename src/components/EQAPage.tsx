@@ -25,45 +25,59 @@ export default function EQAPage({ eqaResults, onAddEQA, configs, instruments }: 
 
   const config = configs.find((c) => c.id === selectedTest) || configs[0];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!yourResult || !peerMean || !peerSD || !config) return;
 
-    const resVal = parseFloat(yourResult);
-    const meanVal = parseFloat(peerMean);
-    const sdVal = parseFloat(peerSD);
-    const sdi = calculateSDI(resVal, meanVal, sdVal);
-    
-    // Bias % = |(Result - Mean) / Mean| * 100
-    const bias = Math.abs((resVal - meanVal) / meanVal) * 100;
-    // For a single point Sigma estimate: (TEa - Bias) / CV
-    // We'll use a conservative CV of 2.0% if we don't have IQC context here, 
-    // or better, use TEa/SDI relationship if SD is Peer SD.
-    // Standard Sigma from EQA often uses %Bias and TEa.
-    const sigma = (config.tea - bias) / 2.0;
+    try {
+      const resVal = parseFloat(yourResult);
+      const meanVal = parseFloat(peerMean);
+      const sdVal = parseFloat(peerSD);
+      
+      const sdi = calculateSDI(resVal, meanVal, sdVal);
+      
+      // Bias % = |(Result - Mean) / Mean| * 100
+      const bias = Math.abs((resVal - meanVal) / meanVal) * 100;
+      
+      // Calculate Sigma using Peer CV
+      // Peer CV = (Peer SD / Peer Mean) * 100
+      const peerCV = (sdVal / meanVal) * 100;
+      
+      // For Sigma estimate: (TEa - |Bias|) / PeerCV
+      // Fallback to CV 2.0% if peerCV is 0 or invalid
+      const sigma = peerCV > 0 ? (config.tea - bias) / peerCV : (config.tea - bias) / 2.0;
 
-    const newResult: EQAResult = {
-      id: Math.random().toString(36).substring(2, 9),
-      cycle,
-      testId: selectedTest,
-      instrumentId: selectedInst,
-      yourResult: resVal,
-      peerMean: meanVal,
-      peerSD: sdVal,
-      date: new Date().toISOString(),
-      score: sdi,
-      comment,
-      reagentLot,
-      reagentExp,
-    };
+      const newResult: EQAResult = {
+        id: Math.random().toString(36).substring(2, 9),
+        cycle,
+        testId: selectedTest,
+        instrumentId: selectedInst,
+        yourResult: resVal,
+        peerMean: meanVal,
+        peerSD: sdVal,
+        date: new Date().toISOString(),
+        score: sdi,
+        bias: bias,
+        sigma: sigma,
+        comment,
+        reagentLot,
+        reagentExp,
+      };
 
-    onAddEQA(newResult);
-    setYourResult('');
-    setPeerMean('');
-    setPeerSD('');
-    setComment('');
-    setReagentLot('');
-    setReagentExp('');
+      await onAddEQA(newResult);
+      alert('บันทึกผล EQA สำเร็จเรียบร้อยแล้วครับ');
+      
+      // Clear form
+      setYourResult('');
+      setPeerMean('');
+      setPeerSD('');
+      setComment('');
+      setReagentLot('');
+      setReagentExp('');
+    } catch (err) {
+      console.error('EQA Save Error:', err);
+      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+    }
   };
 
   if (!config) {
@@ -236,8 +250,8 @@ export default function EQAPage({ eqaResults, onAddEQA, configs, instruments }: 
                     eqaResults.map(res => {
                       const test = configs.find(c => c.id === res.testId);
                       const sdi = res.score || 0;
-                      const bias = Math.abs((res.yourResult - res.peerMean) / res.peerMean) * 100;
-                      const sigmaEstimate = ( (test?.tea || 10) - bias) / 2.0;
+                      const bias = res.bias !== undefined ? res.bias : Math.abs((res.yourResult - res.peerMean) / res.peerMean) * 100;
+                      const sigmaEstimate = res.sigma !== undefined ? res.sigma : ( (test?.tea || 10) - bias) / 2.0;
                       return (
                         <tr key={res.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-6 py-4">

@@ -88,28 +88,34 @@ export default function IQCPage({ results, onAddResult, configs, instruments, cu
     return 'Unacceptable';
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!value) return;
 
-    const numValue = parseFloat(value);
-    const violations = checkWestgardRules(numValue, results, config, level);
+    try {
+      const numValue = parseFloat(value);
+      const violations = checkWestgardRules(numValue, results, config, level);
 
-    const newResult: QCResult = {
-      id: Math.random().toString(36).substr(2, 9),
-      date: new Date().toISOString(),
-      value: numValue,
-      level,
-      instrumentId: selectedInst,
-      testId: selectedTest,
-      operatorId: currentUser.id,
-      comment,
-      westgardViolations: violations,
-    };
+      const newResult: QCResult = {
+        id: Math.random().toString(36).substr(2, 9),
+        date: new Date().toISOString(),
+        value: numValue,
+        level,
+        instrumentId: selectedInst,
+        testId: selectedTest,
+        operatorId: currentUser.id,
+        comment,
+        westgardViolations: violations,
+      };
 
-    onAddResult(newResult);
-    setValue('');
-    setComment('');
+      await onAddResult(newResult);
+      setValue('');
+      setComment('');
+      alert('บันทึกผลการทดสอบสำเร็จเรียบร้อยแล้วครับ');
+    } catch (err) {
+      console.error('IQC Save Error:', err);
+      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+    }
   };
 
   return (

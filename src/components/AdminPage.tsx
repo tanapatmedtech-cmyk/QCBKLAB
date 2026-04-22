@@ -101,9 +101,20 @@ export default function AdminPage({ users, onUpdateUser, onDeleteUser, results, 
     }
   };
 
-  const handleDeleteUser = (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user license?')) return;
-    onDeleteUser(userId);
+  const handleDeleteUser = async (userId: string) => {
+    const targetUser = users.find(u => u.id === userId);
+    if (!targetUser) return;
+
+    if (!confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้งาน "${targetUser.name}" ออกจากระบบ?`)) return;
+    
+    try {
+      console.log(`[ADMIN] Requesting delete for user: ${userId}`);
+      await onDeleteUser(userId);
+      alert(`ลบผู้ใช้งาน ${targetUser.name} เรียบร้อยแล้วครับ`);
+    } catch (err) {
+      console.error('[ADMIN DELETE ERROR]', err);
+      alert('ไม่สามารถลบผู้ใช้งานได้ในขณะนี้ โปรดตรวจสอบการเชื่อมต่อหรือสิทธิ์การเข้าถึงครับ');
+    }
   };
 
   const filteredResults = results.filter(r => 
