@@ -1,0 +1,126 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Lab personnel authorized to use the system",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "licenseNumber": { "type": "string" },
+        "role": { "type": "string", "enum": ["MT", "MD", "ADMIN"] },
+        "password": { "type": "string" }
+      },
+      "required": ["id", "name", "licenseNumber", "role"]
+    },
+    "QCResult": {
+      "title": "QC Result",
+      "description": "Internal Quality Control measurement",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "value": { "type": "number" },
+        "level": { "type": "integer", "enum": [1, 2, 3] },
+        "instrumentId": { "type": "string" },
+        "testId": { "type": "string" },
+        "operatorId": { "type": "string" },
+        "comment": { "type": "string" },
+        "westgardViolations": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["active", "deleted"] },
+        "deleteReason": { "type": "string" },
+        "eventId": { "type": "string" }
+      },
+      "required": ["id", "date", "value", "level", "instrumentId", "testId", "operatorId", "westgardViolations"]
+    },
+    "QCEvent": {
+      "title": "QC Event",
+      "description": "Major event affecting QC like calibration or reagent change",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["calibration", "reagent_change", "maintenance", "control_lot_change"] },
+        "testId": { "type": "string" },
+        "instrumentId": { "type": "string" },
+        "lotNumber": { "type": "string" },
+        "operatorId": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "date", "type", "testId", "instrumentId", "operatorId", "description"]
+    },
+    "EQAResult": {
+      "title": "EQA Result",
+      "description": "External Quality Assessment result",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "cycle": { "type": "string" },
+        "testId": { "type": "string" },
+        "instrumentId": { "type": "string" },
+        "yourResult": { "type": "number" },
+        "peerMean": { "type": "number" },
+        "peerSD": { "type": "number" },
+        "targetValue": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "score": { "type": "number" },
+        "comment": { "type": "string" },
+        "reagentLot": { "type": "string" },
+        "reagentExp": { "type": "string" }
+      },
+      "required": ["id", "cycle", "testId", "yourResult", "peerMean", "peerSD", "date"]
+    },
+    "Instrument": {
+      "title": "Instrument",
+      "description": "Laboratory Analyzer",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "model": { "type": "string" }
+      },
+      "required": ["id", "name", "model"]
+    },
+    "QCConfig": {
+      "title": "QC Configuration",
+      "description": "Test specific parameters for QC",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "testName": { "type": "string" },
+        "unit": { "type": "string" },
+        "tea": { "type": "number" },
+        "level1": { "type": "object" },
+        "level2": { "type": "object" },
+        "level3": { "type": "object" }
+      },
+      "required": ["id", "testName", "unit", "tea", "level1", "level2"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "Registered lab personnel"
+    },
+    "qc_results": {
+      "schema": "QCResult",
+      "description": "IQC history"
+    },
+    "qc_events": {
+      "schema": "QCEvent",
+      "description": "Major events history"
+    },
+    "eqa_results": {
+      "schema": "EQAResult",
+      "description": "EQA cycles history"
+    },
+    "instruments": {
+      "schema": "Instrument",
+      "description": "Active analyzer platforms"
+    },
+    "qc_configs": {
+      "schema": "QCConfig",
+      "description": "Test parameters and target values"
+    }
+  }
+}

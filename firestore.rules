@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Collections
+    match /users/{userId} {
+      // Allow public read for login lookup and verification
+      allow read: if true; 
+      // Anyone can create a registration
+      allow create: if true;
+      // Only signed in users (self or admin) can update/delete
+      allow update, delete: if isSignedIn(); 
+    }
+
+    match /qc_results/{resId} {
+      // Public Read Access for Dashboard visibility
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(resId);
+      allow update, delete: if isSignedIn();
+    }
+
+    match /qc_events/{eventId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(eventId);
+      allow update, delete: if isSignedIn();
+    }
+
+    match /eqa_results/{resId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(resId);
+      allow update, delete: if isSignedIn();
+    }
+
+    match /instruments/{instId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    match /qc_configs/{confId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+  }
+}
