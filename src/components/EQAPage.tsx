@@ -85,9 +85,16 @@ export default function EQAPage({ eqaResults, onAddEQA, configs, instruments }: 
       setComment('');
       setReagentLot('');
       setReagentExp('');
-    } catch (err) {
-      console.error('EQA Save Error:', err);
-      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+    } catch (err: any) {
+      console.error('EQA Save Error Details:', err);
+      let msg = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง';
+      try {
+        const detail = JSON.parse(err.message);
+        msg += `\n(${detail.error || 'Firestore Denied'})`;
+      } catch (e) {
+        msg += `\n(${err.message || 'Unknown'})`;
+      }
+      alert(msg);
     }
   };
 

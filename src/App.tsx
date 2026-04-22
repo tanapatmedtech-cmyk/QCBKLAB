@@ -199,17 +199,24 @@ export default function App() {
 
   if (loading && users.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0F4C81] flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#0F4C81] flex flex-col items-center justify-center p-6">
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center space-y-4"
+          className="flex flex-col items-center space-y-6"
         >
           <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
           <div className="text-center">
-            <p className="text-white font-bold tracking-tight">QC BK Lab Plus<sup>+</sup></p>
+            <p className="text-white font-bold tracking-tight text-lg">QC BK Lab Plus<sup>+</sup></p>
             <p className="text-white/60 text-xs mt-1">กำลังเริ่มระบบและความปลอดภัย...</p>
           </div>
+          
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors backdrop-blur-sm"
+          >
+            หากรอนานเกินไป กรุณากดรีเฟรชหน้าจอ
+          </button>
         </motion.div>
       </div>
     );

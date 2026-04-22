@@ -133,9 +133,16 @@ export default function IQCPage({ results, onAddResult, configs, instruments, cu
       setValue('');
       setComment('');
       alert('บันทึกผลการทดสอบสำเร็จเรียบร้อยแล้วครับ');
-    } catch (err) {
-      console.error('IQC Save Error:', err);
-      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+    } catch (err: any) {
+      console.error('IQC Save Error Details:', err);
+      let msg = 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง';
+      try {
+        const detail = JSON.parse(err.message);
+        msg += `\n(${detail.error || 'Firestore Denied'})`;
+      } catch (e) {
+        msg += `\n(${err.message || 'Unknown'})`;
+      }
+      alert(msg);
     }
   };
 

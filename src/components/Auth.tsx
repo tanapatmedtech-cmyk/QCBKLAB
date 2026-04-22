@@ -84,12 +84,29 @@ export default function Auth({ onLogin, users, loadingData }: AuthProps) {
         }
       }
 
+      // Check for fallback admins first
+      const isAdmin001 = formData.licenseNumber === 'ADMIN-001' && formData.password === 'admin';
+      const isAdmin002 = formData.licenseNumber === 'ADMIN-002' && formData.password === 'admin';
+      
+      if (isAdmin001 || isAdmin002) {
+          const systemAdmin: UserType = {
+            id: isAdmin001 ? 'admin-1' : 'admin-2',
+            name: isAdmin001 ? 'Admin 001' : 'Admin 002',
+            licenseNumber: formData.licenseNumber,
+            password: 'admin',
+            role: 'ADMIN',
+            status: 'APPROVED'
+          };
+          onLogin(systemAdmin);
+          return;
+      }
+
       if (!users || users.length === 0) {
           setError('กำลังรอข้อมูลรายชื่อ... โปรดรอสักครู่แล้วลองใหม่');
           setLoading(false);
           return;
       }
-      
+
       const user = users.find(u => u.licenseNumber === formData.licenseNumber && u.password === formData.password);
       if (user) {
         if (user.status === 'PENDING') {
@@ -100,23 +117,7 @@ export default function Auth({ onLogin, users, loadingData }: AuthProps) {
           onLogin(user);
         }
       } else {
-        // Check for fallback admins
-        const isAdmin001 = formData.licenseNumber === 'ADMIN-001' && formData.password === 'admin';
-        const isAdmin002 = formData.licenseNumber === 'ADMIN-002' && formData.password === 'admin';
-        
-        if (isAdmin001 || isAdmin002) {
-            const systemAdmin: UserType = {
-              id: isAdmin001 ? 'admin-1' : 'admin-2',
-              name: isAdmin001 ? 'Admin 001' : 'Admin 002',
-              licenseNumber: formData.licenseNumber,
-              password: 'admin',
-              role: 'ADMIN',
-              status: 'APPROVED'
-            };
-            onLogin(systemAdmin);
-        } else {
-          setError('รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-        }
+        setError('รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
       }
     } catch (err: any) {
       console.error('Submit Error:', err);

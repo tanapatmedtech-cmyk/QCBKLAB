@@ -52,25 +52,28 @@ export async function testConnection() {
 
 // Syncing functions
 export const syncResults = (callback: (data: QCResult[]) => void) => {
-  const q = query(collection(db, 'qc_results'), orderBy('date', 'asc'));
+  const q = query(collection(db, 'qc_results'));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => doc.data() as QCResult);
+    console.log('[FIREBASE] Sync Results:', data.length);
     callback(data);
   }, (err) => handleFirestoreError(err, 'list', 'qc_results', false));
 };
 
 export const syncEQAResults = (callback: (data: EQAResult[]) => void) => {
-  const q = query(collection(db, 'eqa_results'), orderBy('date', 'asc'));
+  const q = query(collection(db, 'eqa_results'));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => doc.data() as EQAResult);
+    console.log('[FIREBASE] Sync EQA:', data.length);
     callback(data);
   }, (err) => handleFirestoreError(err, 'list', 'eqa_results', false));
 };
 
 export const syncEvents = (callback: (data: QCEvent[]) => void) => {
-  const q = query(collection(db, 'qc_events'), orderBy('date', 'asc'));
+  const q = query(collection(db, 'qc_events'));
   return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map(doc => doc.data() as QCEvent);
+    console.log('[FIREBASE] Sync Events:', data.length);
     callback(data);
   }, (err) => handleFirestoreError(err, 'list', 'qc_events', false));
 };
@@ -99,14 +102,16 @@ export const syncConfigs = (callback: (data: QCConfig[]) => void) => {
 // Write functions
 export const addQCResult = async (res: QCResult) => {
   try {
+    console.log('[FIREBASE] Adding QC Result:', res.id);
     await setDoc(doc(db, 'qc_results', res.id), res);
+    console.log('[FIREBASE] QC Result Saved Success');
   } catch (err) {
     handleFirestoreError(err, 'create', `qc_results/${res.id}`);
   }
 };
 
 export const updateQCResults = async (results: QCResult[]) => {
-    // Note: For bulk updates we usually use batches, but here we just update individual docs
+    console.log('[FIREBASE] Updating Bulk QC Results:', results.length);
     for (const res of results) {
         await setDoc(doc(db, 'qc_results', res.id), res);
     }
@@ -114,7 +119,9 @@ export const updateQCResults = async (results: QCResult[]) => {
 
 export const addEQAResult = async (res: EQAResult) => {
   try {
+    console.log('[FIREBASE] Adding EQA Result:', res.id);
     await setDoc(doc(db, 'eqa_results', res.id), res);
+    console.log('[FIREBASE] EQA Result Saved Success');
   } catch (err) {
     handleFirestoreError(err, 'create', `eqa_results/${res.id}`);
   }
@@ -122,7 +129,9 @@ export const addEQAResult = async (res: EQAResult) => {
 
 export const addQCEvent = async (event: QCEvent) => {
   try {
+    console.log('[FIREBASE] Adding Event:', event.id);
     await setDoc(doc(db, 'qc_events', event.id), event);
+    console.log('[FIREBASE] Event Saved Success');
   } catch (err) {
     handleFirestoreError(err, 'create', `qc_events/${event.id}`);
   }
@@ -148,7 +157,9 @@ export const deleteUser = async (userId: string) => {
 
 export const saveInstrument = async (inst: Instrument) => {
   try {
+    console.log('[FIREBASE] Saving Instrument:', inst.id);
     await setDoc(doc(db, 'instruments', inst.id), inst);
+    console.log('[FIREBASE] Instrument Saved Success');
   } catch (err) {
     handleFirestoreError(err, 'write', `instruments/${inst.id}`);
   }
@@ -156,6 +167,7 @@ export const saveInstrument = async (inst: Instrument) => {
 
 export const deleteInstrument = async (id: string) => {
   try {
+    console.log('[FIREBASE] Deleting Instrument:', id);
     await deleteDoc(doc(db, 'instruments', id));
   } catch (err) {
     handleFirestoreError(err, 'delete', `instruments/${id}`);
@@ -164,7 +176,9 @@ export const deleteInstrument = async (id: string) => {
 
 export const saveConfig = async (conf: QCConfig) => {
   try {
+    console.log('[FIREBASE] Saving Config:', conf.id);
     await setDoc(doc(db, 'qc_configs', conf.id), conf);
+    console.log('[FIREBASE] Config Saved Success');
   } catch (err) {
     handleFirestoreError(err, 'write', `qc_configs/${conf.id}`);
   }
@@ -172,6 +186,7 @@ export const saveConfig = async (conf: QCConfig) => {
 
 export const deleteConfig = async (id: string) => {
   try {
+    console.log('[FIREBASE] Deleting Config:', id);
     await deleteDoc(doc(db, 'qc_configs', id));
   } catch (err) {
     handleFirestoreError(err, 'delete', `qc_configs/${id}`);

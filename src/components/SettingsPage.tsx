@@ -46,8 +46,9 @@ export default function SettingsPage({
     try {
       await onAddInstrument(newInst);
       setInstForm({ name: '', model: '' });
-    } catch (err) {
-      alert('Error adding analyzer');
+    } catch (err: any) {
+      console.error('Add Instrument Error:', err);
+      alert('Error adding analyzer: ' + (err.message || 'Unknown'));
     }
   };
 
@@ -78,13 +79,15 @@ export default function SettingsPage({
       setTestForm({
         testName: '',
         unit: '',
+        currentLot: '',
         tea: 10,
         level1: { mean: 0, sd: 0 },
         level2: { mean: 0, sd: 0 },
         level3: { mean: 0, sd: 0 }
       });
-    } catch (err) {
-      alert('Error adding test config');
+    } catch (err: any) {
+      console.error('Add Test Error Details:', err);
+      alert('Error adding test config: ' + (err.message || 'Unknown'));
     }
   };
 
