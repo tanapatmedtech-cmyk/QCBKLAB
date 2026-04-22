@@ -4,7 +4,8 @@ export function checkWestgardRules(
   currentValue: number,
   previousResults: QCResult[],
   config: QCConfig,
-  level: 1 | 2 | 3
+  level: 1 | 2 | 3,
+  sigma?: number
 ): string[] {
   const violations: string[] = [];
   const levelParams = level === 1 ? config.level1 : (level === 2 ? config.level2 : config.level3);
@@ -12,40 +13,42 @@ export function checkWestgardRules(
   if (!levelParams) return [];
   
   const { mean, sd } = levelParams;
-
   const zScore = (currentValue - mean) / sd;
   const absZ = Math.abs(zScore);
 
-  // 1-2s (Warning)
-  if (absZ > 2) {
+  // Determine which rules to check based on Sigma
+  // If sigma is provided, we only check rules suggested by that sigma
+  const activeRules = sigma !== undefined ? suggestWestgardRules(sigma) : ['1-2s', '1-3s', '2-2s', 'R-4s', '4-1s', '10-x'];
+
+  // 1-2s (Warning/Rejection depends on preference, usually warning)
+  if (absZ > 2 && activeRules.includes('1-2s')) {
     violations.push('1-2s');
   }
 
   // 1-3s (Rejection)
-  if (absZ > 3) {
+  if (absZ > 3 && activeRules.includes('1-3s')) {
     violations.push('1-3s');
   }
 
   // Multi-rule checks (need previous results)
-  const lastResults = previousResults.filter((r) => r.level === level).slice(-1);
+  const lastResults = previousResults.filter((r) => r.level === level).slice(-10);
   
   if (lastResults.length >= 1) {
     const prev = lastResults[0];
     const prevZ = (prev.value - mean) / sd;
 
     // 2-2s (Rejection)
-    // Two consecutive results > 2SD in same direction
-    if (absZ > 2 && Math.abs(prevZ) > 2 && Math.sign(zScore) === Math.sign(prevZ)) {
-      violations.push('2-2s');
+    if (activeRules.includes('2-2s')) {
+      if (absZ > 2 && Math.abs(prevZ) > 2 && Math.sign(zScore) === Math.sign(prevZ)) {
+        violations.push('2-2s');
+      }
     }
 
     // R-4s (Rejection)
-    // Range between two results in same run > 4SD
-    // (Note: Strictly R-4s usually refers to Level 1 vs Level 2 in same run,
-    // but often interpreted as consecutive points too. 
-    // Here we check consecutive points for simplicity if requested in a single level context)
-    if (Math.abs(zScore - prevZ) > 4) {
-      violations.push('R-4s');
+    if (activeRules.includes('R-4s')) {
+      if (Math.abs(zScore - prevZ) > 4) {
+        violations.push('R-4s');
+      }
     }
   }
 

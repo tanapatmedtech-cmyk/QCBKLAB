@@ -17,6 +17,9 @@ export interface QCResult {
   operatorId: string;
   comment?: string;
   westgardViolations: string[];
+  sigma?: number;
+  bias?: number;
+  cv?: number;
   status?: 'active' | 'deleted';
   deleteReason?: string;
   eventId?: string;

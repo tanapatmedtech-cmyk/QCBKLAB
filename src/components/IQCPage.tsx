@@ -90,11 +90,18 @@ export default function IQCPage({ results, onAddResult, configs, instruments, cu
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!value) return;
+    if (!value || !config) return;
 
     try {
       const numValue = parseFloat(value);
-      const violations = checkWestgardRules(numValue, results, config, level);
+      
+      // Calculate metrics INCLUDING the new value to get current performance state
+      const allValues = [...currentLevelResults.map(r => r.value), numValue];
+      const targetMean = level === 1 ? config.level1.mean : (level === 2 ? config.level2.mean : config.level3?.mean || 0);
+      const currentMetrics = getQCMetrics(allValues, targetMean, config.tea);
+      
+      // Use the calculated sigma to filter which Westgard rules are checked
+      const violations = checkWestgardRules(numValue, results, config, level, currentMetrics.sigma);
 
       const newResult: QCResult = {
         id: Math.random().toString(36).substr(2, 9),
@@ -106,6 +113,9 @@ export default function IQCPage({ results, onAddResult, configs, instruments, cu
         operatorId: currentUser.id,
         comment,
         westgardViolations: violations,
+        sigma: currentMetrics.sigma,
+        bias: currentMetrics.bias,
+        cv: currentMetrics.cv
       };
 
       await onAddResult(newResult);
@@ -372,6 +382,7 @@ export default function IQCPage({ results, onAddResult, configs, instruments, cu
                     <th className="px-6 py-3">Timestamp</th>
                     <th className="px-6 py-3">Value</th>
                     <th className="px-6 py-3">Z-Score</th>
+                    <th className="px-6 py-3">Sigma</th>
                     <th className="px-6 py-3">Westgard</th>
                   </tr>
                 </thead>
@@ -390,6 +401,15 @@ export default function IQCPage({ results, onAddResult, configs, instruments, cu
                           <td className="px-6 py-3 font-mono font-bold">{r.value}</td>
                           <td className={`px-6 py-3 font-mono font-bold ${Math.abs(z) > 2 ? 'text-amber-600' : 'text-slate-400'}`}>
                             {z.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-3">
+                            {r.sigma !== undefined ? (
+                              <span className={`font-bold text-xs ${r.sigma >= 6 ? 'text-emerald-600' : r.sigma >= 3 ? 'text-blue-600' : 'text-red-500'}`}>
+                                {r.sigma.toFixed(2)}
+                              </span>
+                            ) : (
+                              <span className="text-slate-300">-</span>
+                            )}
                           </td>
                           <td className="px-6 py-3 font-bold text-xs">
                             {r.westgardViolations.length > 0 ? (

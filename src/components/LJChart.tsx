@@ -18,9 +18,11 @@ export default function LJChart({ results, config, level }: LJChartProps) {
   
   const { mean, sd } = levelParams;
   
-  const filteredResults = results
-    .filter(r => r.level === level)
-    .slice(-30); // Last 30 points
+  const filteredResults = useMemo(() => 
+    results
+      .filter(r => r.level === level && r.testId === config.id)
+      .slice(-30) // Last 30 points
+  , [results, level, config.id]);
 
   const width = 600;
   const height = 300;
